@@ -3,6 +3,25 @@ kind: Namespace
 metadata:
   name: ai-services
 ---
+# OpenEBS持久化存储声明（PVC）
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-pvc
+  namespace: ai-services
+  annotations:
+    # 防止ArgoCD误删PVC导致模型丢失
+    argocd.argoproj.io/sync-options: Prune=false,Delete=false
+    # 确保PVC比Deployment先创建
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  storageClassName: openebs-hostpath
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 100Gi # 根据你的硬盘大小调整
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,6 +40,15 @@ spec:
         image: ollama/ollama:latest
         ports:
         - containerPort: 11434
+          # 👇 你刚才添加的挂载
+         volumeMounts:
+         - name: ollama-storage
+           mountPath: /root/.ollama
+        # 👇 你刚才添加的卷定义
+       volumes:
+       - name: ollama-storage
+         persistentVolumeClaim:
+           claimName: ollama-pvc           
 ---
 apiVersion: v1
 kind: Service

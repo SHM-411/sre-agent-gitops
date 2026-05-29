@@ -41,14 +41,14 @@ spec:
         ports:
         - containerPort: 11434
           # 👇 你刚才添加的挂载
-         volumeMounts:
-         - name: ollama-storage
-           mountPath: /root/.ollama
+        volumeMounts:
+        - name: ollama-storage
+          mountPath: /root/.ollama
         # 👇 你刚才添加的卷定义
-       volumes:
-       - name: ollama-storage
-         persistentVolumeClaim:
-           claimName: ollama-pvc           
+      volumes:
+      - name: ollama-storage
+        persistentVolumeClaim:
+          claimName: ollama-pvc           
 ---
 apiVersion: v1
 kind: Service
